@@ -9,3 +9,4 @@ def calcAngleWithHorizontal(originPt, finalPt):
         angle += 360
         
     return angle
+

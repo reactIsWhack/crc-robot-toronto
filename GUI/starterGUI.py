@@ -1,5 +1,5 @@
 from tkinter import *
-from ledRing import setLed
+from lineFollow.ledRing import setLed
 import cv2
 
 # width = 800, height = 480 for monitor
@@ -9,10 +9,14 @@ class StarterGUI:
         self.window = Tk()
         self.picam = picam
         
+        # define button size
         self.button_width = 105
         self.button_height = 60
+
+        # define window size
         self.window_width = 400
         self.window_height = 400
+        self.window.geometry(f"{self.window_width}x{self.window_height}")
         self.window.resizable(False, False) # make window unable to be resized
 
         self.redIncButton = Button(self.window, text="Red Increase")
@@ -89,7 +93,6 @@ class StarterGUI:
     
     # initialize buttons --> place them on the GUI
     def createButtons(self):
-        self.window.geometry(f"{self.window_width}x{self.window_height}")
 
         remainingSpace = self.window_width - 3 * self.button_width - 2 * self.horizontalPadding
         spacing = remainingSpace / 2

@@ -1,5 +1,5 @@
 import cv2
-from ledRing import turnLedRingOn, turnLedRingOff
+from lineFollow.ledRing import turnLedRingOn, turnLedRingOff
 from time import sleep
 
 monitorWidth = 800
