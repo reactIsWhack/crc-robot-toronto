@@ -1,5 +1,9 @@
 import cv2
-import numpy as np
+import sys
+from pathlib import Path
+root_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_dir))
+from utilities.mathUtilities import calcAngleWithHorizontal
 
 pointRadius = 12
 avgPixelColor = (0, 0, 255)
@@ -126,9 +130,20 @@ def getLineCentroid(blackPixelCoords):
         xSum += blackPixelCoord[1]
         ySum += blackPixelCoord[0]
 
-    if len(blackPixelCoords) == 0:
-        return "No Black Pixels Found"
-
     xCentroid = xSum / len(blackPixelCoords)
     yCentroid = ySum / len(blackPixelCoords)
     return (xCentroid, yCentroid)
+
+def findDestination(lineCenter, candidates, oldPosAngle):
+    # candidates is a list of (x, y) coordinates
+    destination = (-1, -1)
+    closestAngle = 0
+    
+    for candidate in candidates:
+        angle = calcAngleWithHorizontal(lineCenter, candidate)
+
+        if abs(oldPosAngle - angle) < closestAngle:
+            destination = candidate
+            closestAngle = angle
+    
+    return destination, closestAngle

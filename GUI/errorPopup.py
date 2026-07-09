@@ -14,7 +14,6 @@ class ErrorPopup:
         self.errorHeaderWidth = 100
         self.errorHeaderYCoord = 10
         self.errorHeader = Label(self.window, text="Errors", font=("Arial", 24, "bold"), fg="#B61F04")  # Font family, size, style)
-        print((self.windowWidth / 2) - (self.errorHeaderWidth / 2))
         self.errorHeader.place(x=(self.windowWidth / 2) - (self.errorHeaderWidth / 2), y=self.errorHeaderYCoord, width=self.errorHeaderWidth)
                 
     def displayWindow(self):

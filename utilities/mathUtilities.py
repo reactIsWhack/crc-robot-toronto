@@ -10,3 +10,7 @@ def calcAngleWithHorizontal(originPt, finalPt):
         
     return angle
 
+def checkInRange(value, error, target):
+    if value >= target - error and value <= target + error:
+        return True
+    return False

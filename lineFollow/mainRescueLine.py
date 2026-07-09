@@ -1,13 +1,15 @@
 import sys
 from pathlib import Path
 from picamera2 import Picamera2
-import cv2
+from blackLineComputations import getAvgPixelsAndOldPos, getLineCentroid
+from motion import lineFollow
+import threading
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from GUI.starterGUIUtilities import initializeGUI
 from GUI.starterGUI import StarterGUI
 from utilities.cameraUtilities import cleanup, getCameraCaptures, displayImages
-from lineFollow.blackLineComputations import getAvgPixelsAndOldPos
+from utilities.mathUtilities import calcAngleWithHorizontal
 
 # Initialize picam
 # DISCLAIMER: Images from the camera will be in BGR --> RGB means BGR
@@ -43,7 +45,11 @@ try:
        # get frame from the camera ---> then extract masks for the black line + green squares
        frame, blackLineMask, greenSquareMask, blackPixelCoords, whiteBlobMask = getCameraCaptures(picam)
 
-       # find all average pixels --> break up by top/botom row and left/right col   
+       if len(blackPixelCoords) == 0:
+           # handle no black pixels found error here
+           continue
+
+       # find all average pixels --> break up by top/botom row and left/right col. avg pixels are candidates for the destination point.
        # get old pos, which is the bottom most point
        avgPixels, oldPos = getAvgPixelsAndOldPos(frameWidth, frameHeight, blackLineMask, frame)
 
@@ -52,14 +58,22 @@ try:
            print("No old pos found")
            continue
        
+       if len(avgPixels) == 0 and lineFollowState != "gap":
+           # gap encountered
+           continue
+       
+       lineCenter = getLineCentroid(blackPixelCoords)
+       # get angle from old pos to center to use as a baseline
+       oldPosAngleWithCenter = calcAngleWithHorizontal(oldPos, lineCenter) 
+
+       lineFollow(lineFollowState, lineCenter, avgPixels, oldPosAngleWithCenter)
+            
        imagesToDisplay = [
-           (frame, "Frame", (0,namedWindowStartY)), 
+           (frame, "Frame", (0,namedWindowStartY)), # (img, name, left corner position)
            (blackLineMask, "Black Line Mask", (monitorWidth-displayWindowWidth, namedWindowStartY)),
            (whiteBlobMask, "White Blob Mask", (monitorWidth-displayWindowWidth, namedWindowStartY))
         ]
    
        displayImages(imagesToDisplay, displayWindowWidth, displayWindowHeight)
-           
-       
 except KeyboardInterrupt:
     cleanup(picam)
