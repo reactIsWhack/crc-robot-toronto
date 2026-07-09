@@ -2,22 +2,20 @@ import cv2
 from lineFollow.ledRing import turnLedRingOn, turnLedRingOff
 from time import sleep
 
-monitorWidth = 800
-
 def onClose(calibrationGUI):
     turnLedRingOff()
     calibrationGUI.window.destroy()
 
-def initializeGUI(frameWidth, picam, calibrationGUI):
+def initializeGUI(picam, calibrationGUI, displayWindowWidth, displayWindowHeight, yCoord, monitorWidth):
     calibrationGUI.createButtons() # place buttons on GUI
     calibrationGUI.createRGBLabels() # place rgb labels with default values
 
     # define the coordinates of the top-left corner of the "Preview" image
     cv2.namedWindow("Preview", cv2.WINDOW_NORMAL)
-    cv2.moveWindow("Preview", monitorWidth-frameWidth+200, 0)
+    cv2.resizeWindow("Preview", displayWindowWidth, displayWindowHeight)
+    cv2.moveWindow("Preview", monitorWidth-displayWindowWidth, yCoord)
 
-    turnLedRingOn()
-    sleep(1.5) # wait a little for the led ring to turn on
+    sleep(2)
 
     # display the "Preview" image
     preview = picam.capture_array()

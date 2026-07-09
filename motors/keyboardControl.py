@@ -1,5 +1,5 @@
 import keyboard
-from motors.motors import moveFwd, moveBwd, turnLeft, turnRight, stopRobot
+from motors import moveFwd, moveBwd, turnLeft, turnRight, stopRobot
 
 baseSpeed = 50
 

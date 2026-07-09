@@ -2,8 +2,6 @@ from tkinter import *
 from lineFollow.ledRing import setLed
 import cv2
 
-# width = 800, height = 480 for monitor
-
 class StarterGUI:
     def __init__(self, picam):
         self.window = Tk()
@@ -32,6 +30,7 @@ class StarterGUI:
         self.red = 255
         self.blue = 130
         self.green = 255
+        setLed(self.red, self.green, self.blue)
         self.coarse = True
         self.changeAmnt = 25
         self.red_label = Label(self.window, text=f"r: {self.red}",)
@@ -56,7 +55,7 @@ class StarterGUI:
     
     def buttonUpdates(self):
         self.updateRGBLabels()
-        setLed(self.red, self.blue, self.green)
+        setLed(self.red, self.green, self.blue)
         preview = self.picam.capture_array()
         cv2.imshow("Preview", preview)
         cv2.waitKey(1)
