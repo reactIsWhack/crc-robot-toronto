@@ -1,5 +1,6 @@
 from lineFollow.ledRing import turnLedRingOff
 import cv2
+from time import sleep
 import numpy as np
 
 # define lower and upper bounds for masks, in hsv
@@ -7,7 +8,7 @@ blackLineLower = np.array([0, 0, 0])
 blackLineUpper = np.array([180, 255, 50])
 lowerGreen = np.array([35, 60, 60])
 upperGreen = np.array([85, 255, 255])
-whiteBlobLower = np.array([0, 0, 90])
+whiteBlobLower = np.array([0, 0, 95])
 whiteBlobUpper = np.array([180, 40, 255])
 
 def cleanup(picam):
@@ -30,18 +31,15 @@ def getCameraCaptures(picam):
     blackLineMask = cv2.bitwise_not(blackLineMask) # invert black line mask
     greenSquareMask = cv2.inRange(frameHSV, lowerGreen, upperGreen)   
     whiteBlobMask = cv2.inRange(frameHSV, whiteBlobLower, whiteBlobUpper)
-
-    # apply tophat morpholgoical transformation to fill in white spots left by led ring
     kernel = np.ones((8,8), np.uint8)
-    whiteBlobMask = cv2.erode(whiteBlobMask, kernel, iterations=30)
-    whiteBlobMask = cv2.GaussianBlur(whiteBlobMask, (5,5), 0)
+    whiteBlobMask = cv2.erode(whiteBlobMask, kernel, iterations=5)
+    whiteBlobMask = cv2.dilate(whiteBlobMask, kernel, iterations=9)
 
-    # return coordinates of elements (pixels) == 0 in blackLineMask --> return coordinates of black pixels
     blackPixelCoords = np.argwhere(blackLineMask == 0)
  
     return frame, blackLineMask, greenSquareMask, blackPixelCoords, whiteBlobMask
 
-def displayImages(images, displayWindowWidth, displayWindowHeight):
+def displayImages(images, displayWindowWidth, displayWindowHeight, mainFrameHeight):
     '''
     images = [(image, name, position)]
     position = (x, y)
@@ -49,10 +47,20 @@ def displayImages(images, displayWindowWidth, displayWindowHeight):
 
     for item in images:
         image, name, position = item
+        height = mainFrameHeight if name == "Frame" else displayWindowHeight 
 
         cv2.namedWindow(name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(name, displayWindowWidth, displayWindowHeight)
+        cv2.resizeWindow(name, displayWindowWidth, height)
         cv2.moveWindow(name, position[0], position[1])
         cv2.imshow(name, image)
 
     cv2.waitKey(1)
+
+
+def displayPreview(picam, calibrationGUI):
+    preview = picam.capture_array()
+    cv2.imshow("Preview", preview)
+    cv2.waitKey(1)
+
+    previewWaitTime = 3
+    calibrationGUI.window.after(previewWaitTime, displayPreview, picam, calibrationGUI)

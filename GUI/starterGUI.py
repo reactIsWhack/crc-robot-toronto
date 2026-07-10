@@ -3,9 +3,8 @@ from lineFollow.ledRing import setLed
 import cv2
 
 class StarterGUI:
-    def __init__(self, picam):
+    def __init__(self):
         self.window = Tk()
-        self.picam = picam
         
         # define button size
         self.button_width = 105
@@ -56,9 +55,6 @@ class StarterGUI:
     def buttonUpdates(self):
         self.updateRGBLabels()
         setLed(self.red, self.green, self.blue)
-        preview = self.picam.capture_array()
-        cv2.imshow("Preview", preview)
-        cv2.waitKey(1)
     
     # functions for updating values of r, g, b
     def decRed(self):
@@ -125,7 +121,7 @@ class StarterGUI:
         self.greenDecButton.config(command=self.decGreen)
         self.greenIncButton.config(command=self.incGreen)
         self.coarseButton.config(command=self.switchMode)
-        self.startButton.config(command=self.closeStarterGUI)
+        self.startButton.config(command=self.onStartButtonPressed)
     
     # placing labels "r: red default", "g: green default", "b: blue default" on GUI
     def createRGBLabels(self):
@@ -149,7 +145,7 @@ class StarterGUI:
     def displayWindow(self):
         self.window.mainloop() # PROGRAM GETS STUCK HERE --> HAVE TO CLOSE WINDOW TO GET UNSTUCK
 
-    def closeStarterGUI(self):
+    def onStartButtonPressed(self):
         self.window.destroy()
         cv2.destroyAllWindows()
 

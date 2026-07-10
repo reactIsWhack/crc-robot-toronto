@@ -1,12 +1,7 @@
-import sys
-from pathlib import Path
-from blackLineComputations import getAvgPixelsAndOldPos, getLineCentroid
-from motion import moveBasedOnState
+from lineFollow.blackLineComputations import getAvgPixelsAndOldPos, getLineCentroid
 from lineFollow.greenSquareIntersection import atGreenSquareIntersection
 from lineFollow.blackLineComputations import findDestination
 import cv2
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
 from utilities.cameraUtilities import getCameraCaptures, displayImages
 from utilities.mathUtilities import calcAngleWithHorizontal
 from motors.motors import moveFwd, turnRight, turnLeft
@@ -47,15 +42,26 @@ def moveBasedOnState(lineFollowState, lineCenter, avgPixels, oldPosAngleWithCent
     else:
         # straight black line, black line intersection, black line turn
         destinationPt, destinationAngle = findDestination(lineCenter, avgPixels, oldPosAngleWithCenter)
+
+        if destinationPt == (-1, -1):
+            # handle no destination pt found 
+            return
+        
         cv2.circle(originalFrame, destinationPt, pointRadius, destinationPtColor, -1) # draw destination point
         #lineFollowState = moveToDestination(destinationAngle, lineFollowState)
 
-def lineFollow(picam, frameWidth, frameHeight, robotState, namedWindowStartY, monitorWidth, displayWindowWidth, displayWindowHeight):
+def lineFollow(picam, frameWidth, frameHeight, robotState, namedWindowStartY, monitorWidth, monitorHeight, displayWindowWidth, displayWindowHeight, mainFrameHeight):
     # get frame from the camera ---> then extract masks for the black line + green squares
     frame, blackLineMask, greenSquareMask, blackPixelCoords, whiteBlobMask = getCameraCaptures(picam)
+    imagesToDisplay = [
+        (frame, "Frame", (10,namedWindowStartY)), # (img, name, left corner position), top left corner
+        (whiteBlobMask, "White Blob Mask", (monitorWidth-displayWindowWidth, monitorHeight - displayWindowHeight - 20)), # bottom right corner
+        (blackLineMask, "Black Line Mask", (monitorWidth-displayWindowWidth, namedWindowStartY)) # top right corner
+    ]
 
     if len(blackPixelCoords) == 0:
         # handle no black pixels found error here
+        displayImages(imagesToDisplay, displayWindowWidth, displayWindowHeight, mainFrameHeight)
         return
 
     # find all average pixels --> break up by top/botom row and left/right col. avg pixels are candidates for the destination point.
@@ -72,15 +78,11 @@ def lineFollow(picam, frameWidth, frameHeight, robotState, namedWindowStartY, mo
         return
     
     lineCenter = getLineCentroid(blackPixelCoords)
+    cv2.circle(frame, lineCenter, pointRadius, (0,255,0), -1)
     # get angle from old pos to center to use as a baseline
     oldPosAngleWithCenter = calcAngleWithHorizontal(oldPos, lineCenter) 
 
-    moveBasedOnState(robotState, lineCenter, avgPixels, oldPosAngleWithCenter)
+    moveBasedOnState(robotState, lineCenter, avgPixels, oldPosAngleWithCenter, frame)
         
-    imagesToDisplay = [
-        (frame, "Frame", (0,namedWindowStartY)), # (img, name, left corner position)
-        (blackLineMask, "Black Line Mask", (monitorWidth-displayWindowWidth, namedWindowStartY)),
-        (whiteBlobMask, "White Blob Mask", (monitorWidth-displayWindowWidth, namedWindowStartY))
-    ]
 
-    displayImages(imagesToDisplay, displayWindowWidth, displayWindowHeight)
+    displayImages(imagesToDisplay, displayWindowWidth, displayWindowHeight, mainFrameHeight)

@@ -18,10 +18,3 @@ class ErrorPopup:
                 
     def displayWindow(self):
         self.window.mainloop()
-
-    
-try:
-    errorPopup = ErrorPopup()
-    errorPopup.displayWindow()
-except KeyboardInterrupt:
-    errorPopup.window.destroy()

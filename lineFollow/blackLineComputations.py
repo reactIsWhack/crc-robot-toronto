@@ -1,8 +1,4 @@
 import cv2
-import sys
-from pathlib import Path
-root_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_dir))
 from utilities.mathUtilities import calcAngleWithHorizontal
 
 pointRadius = 12
@@ -132,18 +128,21 @@ def getLineCentroid(blackPixelCoords):
 
     xCentroid = xSum / len(blackPixelCoords)
     yCentroid = ySum / len(blackPixelCoords)
-    return (xCentroid, yCentroid)
+    return (int(xCentroid), int(yCentroid))
 
 def findDestination(lineCenter, candidates, oldPosAngle):
     # candidates is a list of (x, y) coordinates
-    destination = (-1, -1)
-    closestAngle = 0
+    destinationPt = (-1, -1)
+    destinationAngle = 0
+    closestDist = 2e9
     
     for candidate in candidates:
         angle = calcAngleWithHorizontal(lineCenter, candidate)
+        currDist = abs(oldPosAngle - angle) 
 
-        if abs(oldPosAngle - angle) < closestAngle:
-            destination = candidate
-            closestAngle = angle
+        if currDist < closestDist:
+            destinationPt = candidate
+            destinationAngle = angle
+            closestDist = currDist
     
-    return destination, closestAngle
+    return destinationPt, destinationAngle

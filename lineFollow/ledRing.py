@@ -7,7 +7,7 @@ pixel_pin = board.D18
 pixels = neopixel.NeoPixel(
     pixel_pin,
     num_leds,
-    brightness=0.5,
+    brightness=0.3,
     pixel_order=neopixel.RGB
 )
 
